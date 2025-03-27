@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -22,14 +21,14 @@ namespace TaskTrackerApp.Controllers
         }
 
         // GET: Tasks
-        public async System.Threading.Tasks.Task<IActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             var appDbContext = _context.Tasks.Include(t => t.Status);
             return View(await appDbContext.ToListAsync());
         }
 
         // GET: Tasks/Details/5
-        public async System.Threading.Tasks.Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -57,20 +56,22 @@ namespace TaskTrackerApp.Controllers
         // POST: Tasks/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async System.Threading.Tasks.Task<IActionResult> Create([Bind("TaskId,Title,Description,DueDate,Priority,StatusId,DateCreated")] TaskModel task)
+        public async Task<IActionResult> Create([Bind("TaskId,Title,Description,DueDate,Priority,StatusId")] TaskModel task)
         {
             if (ModelState.IsValid)
             {
+                task.DateCreated = DateTime.Now;
                 _context.Add(task);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["StatusId"] = new SelectList(_context.Statuses, "StatusId", "StatusName", task.StatusId);
             return View(task);
         }
 
         // GET: Tasks/Edit/5
-        public async System.Threading.Tasks.Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
@@ -82,6 +83,7 @@ namespace TaskTrackerApp.Controllers
             {
                 return NotFound();
             }
+
             ViewData["StatusId"] = new SelectList(_context.Statuses, "StatusId", "StatusName", task.StatusId);
             return View(task);
         }
@@ -89,12 +91,20 @@ namespace TaskTrackerApp.Controllers
         // POST: Tasks/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async System.Threading.Tasks.Task<IActionResult> Edit(int id, [Bind("TaskId,Title,Description,DueDate,Priority,StatusId,DateCreated")] TaskModel task)
+        public async Task<IActionResult> Edit(int id, [Bind("TaskId,Title,Description,DueDate,Priority,StatusId")] TaskModel task)
         {
             if (id != task.TaskId)
             {
                 return NotFound();
             }
+
+            var existingTask = await _context.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.TaskId == id);
+            if (existingTask == null)
+            {
+                return NotFound();
+            }
+
+            task.DateCreated = existingTask.DateCreated;
 
             if (ModelState.IsValid)
             {
@@ -116,12 +126,13 @@ namespace TaskTrackerApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["StatusId"] = new SelectList(_context.Statuses, "StatusId", "StatusName", task.StatusId);
             return View(task);
         }
 
         // GET: Tasks/Delete/5
-        public async System.Threading.Tasks.Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {
@@ -142,15 +153,15 @@ namespace TaskTrackerApp.Controllers
         // POST: Tasks/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async System.Threading.Tasks.Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var task = await _context.Tasks.FindAsync(id);
             if (task != null)
             {
                 _context.Tasks.Remove(task);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

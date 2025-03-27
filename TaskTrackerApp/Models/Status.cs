@@ -1,16 +1,19 @@
-﻿namespace TaskTrackerApp.Models;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class Status
+namespace TaskTrackerApp.Models
 {
-    public int StatusId { get; set; }
+    public class Status
+    {
+        public int StatusId { get; set; }
 
-    [Required]
-    [Column(TypeName = "TEXT")]
-    public string StatusName { get; set; } = "";
+        [Required(ErrorMessage = "Status name is required.")]
+        [MaxLength(50, ErrorMessage = "Status name cannot exceed 50 characters.")]
+        [Display(Name = "Status")]
+        [Column(TypeName = "TEXT")]
+        public string StatusName { get; set; } = "";
 
-    public ICollection<Task>? Tasks { get; set; }
+        public ICollection<Task> Tasks { get; set; } = new List<Task>();
+    }
 }

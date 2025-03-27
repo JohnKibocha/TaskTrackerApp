@@ -1,65 +1,39 @@
 @model IEnumerable<TaskTrackerApp.Models.Task>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Task List";
 }
 
-<h1>Index</h1>
+<h2 class="mb-4">Your Tasks</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DueDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Priority)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DateCreated)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DueDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Priority)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status.StatusName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateCreated)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.TaskId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.TaskId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.TaskId">Delete</a>
-            </td>
-        </tr>
+<a asp-action="Create" class="btn btn-success mb-4">Add a Task</a>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No tasks found. Click "Add a Task" to create one.</div>
 }
-    </tbody>
-</table>
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var task in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 position-relative">
+                    <!-- Make card body clickable (excluding buttons) -->
+                    <a asp-action="Details" asp-route-id="@task.TaskId" asp-route-slug="@task.Slug" class="stretched-link text-decoration-none text-dark">
+                        <div class="card-body">
+                            <h5 class="card-title">@task.Title</h5>
+                            <p class="card-text"><strong>Due:</strong> @task.DueDate.ToShortDateString()</p>
+                            <p class="card-text"><strong>Status:</strong> @task.Status?.StatusName</p>
+                            <p class="card-text"><strong>Priority:</strong> @task.Priority</p>
+                        </div>
+                    </a>
+                    <div class="card-footer bg-transparent d-flex justify-content-end gap-2 z-2 position-relative">
+                        <a asp-action="Delete" asp-route-id="@task.TaskId" class="btn btn-outline-danger btn-sm">Delete</a>
+                        <a asp-action="Details" asp-route-id="@task.TaskId" asp-route-slug="@task.Slug" class="btn btn-outline-primary btn-sm">Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
